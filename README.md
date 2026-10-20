@@ -104,7 +104,7 @@ ollama run llama3.2:3b "Say hello in one sentence"
 
 ## Part 3: Set up the project (≈10 min)
 
-1. Unzip `llm-soc.zip` somewhere easy, e.g. `C:\Users\<you>\projects\llm-soc`.
+1. Clone the repo: git clone https://github.com/ojasmessi/LLM-SOC.git
 2. Open that folder in VS Code (**File → Open Folder**), then open a terminal (**Terminal → New Terminal**).
 3. Create a virtual environment (a private box for this project's Python packages) and install them:
 
@@ -143,7 +143,7 @@ Look at the `findings` and `risk_score` in the response, then open `logs/llm_eve
 
 > **No time / laptop too slow?** Set `$env:MOCK_LLM="1"` before starting uvicorn to use a fake model. Good for testing the pipeline, but **never report mock numbers** as results.
 
-## Part 5: Run the attack suite: your baseline (Day 1 deliverable)
+## Part 5: Run the attack suite: your baseline 
 
 Open a **second** terminal (activate the venv again) and run:
 ```powershell
@@ -180,7 +180,7 @@ python -m garak --model_type rest -G garak_rest.json --probes promptinject --gen
 
 ✅ At the end Garak prints a pass/fail rate per probe and the path to an **HTML report**. Screenshot it for your README. Then try other probes: `--probes encoding`, `--probes dan`, `--probes latentinjection`. List them all with `python -m garak --list_probes`.
 
-## Part 7: Turn on the AI firewall and re-test (Day 2 deliverable)
+## Part 7: Turn on the AI firewall and re-test
 
 Stop the server (**Ctrl+C**) and restart with enforcement:
 ```powershell
@@ -192,13 +192,7 @@ Re-run the same tests:
 python attacks/run_attacks.py --label guardrails --runs 3
 python -m garak --model_type rest -G garak_rest.json --probes promptinject --generations 1
 ```
-✅ Compare with the baseline. Fill this table for your README (use **your** numbers):
-
-| Configuration | Attack success | Detected | Benign blocked |
-|---|---|---|---|
-| Baseline (monitor only) | __/30 | __/30 | __/6 |
-| Guardrails (enforce) | __/30 | __/30 | __/6 |
-| Garak promptinject: baseline → guardrails | __% → __% | | |
+✅ Compare with the baseline.
 
 Baseline (guardrails off)	Guardrails on	Change
 Attack success	11/50 (22%)	2/50 (4%)	⬇ 82% fewer successful attacks
@@ -207,23 +201,9 @@ False positives	0/10	0/10	✅ Normal users not affected
 Unrequested actions	5/10	5/10	⚠ Known limitation #2
 Emails to attacker	Many	0	✅ Exfiltration stopped
 
+## Part 8: Send the logs to Wazuh 
 
-## Known limitations
-- **Paraphrased system-prompt leaks** are not detected: the canary token only
-  catches verbatim leaks (2/50 attacks, SPL-01, succeeded undetected).
-- **Unrequested internal actions:** the agent still sends emails the user didn't
-  ask for to internal addresses (5/10 benign questions). Next step: an intent
-  check before any tool call (human-in-the-loop).
-- Guardrails are regex-based and can be bypassed by rephrasing or translation;
-  next step is an ML classifier such as Llama Guard.
-
-**Be honest about what still gets through.** Regex filters are easy to bypass (try rephrasing an attack, using another language, or base64). Writing "my regex guardrails stopped X but were bypassed by Y, so the next step is an ML classifier like Llama Guard or NeMo Guardrails" sounds far more expert than claiming 100%.
-
-To understand each defence, open `guardrails.py`: each of the 4 functions has a comment saying which OWASP risk it covers.
-
-## Part 8: Send the logs to Wazuh (Day 3, your SOC strength)
-
-You need a Wazuh manager (e.g. the one from your thesis lab, or the Wazuh OVA in VirtualBox) and a Wazuh agent on the machine running the app.
+You need a Wazuh manager (e.g. the Wazuh OVA in VirtualBox) and a Wazuh agent on the machine running the app.
 
 **8.1 Tell the agent to read the log file.** Add to the agent's `ossec.conf` (Windows: `C:\Program Files (x86)\ossec-agent\ossec.conf`):
 ```xml
@@ -264,7 +244,7 @@ The 8 rules:
 
 Read `docs/playbook.md`. It walks through triage → containment → investigation → recovery for "prompt injection leading to data leak", including the GDPR 72-hour notification point. Practise explaining it out loud using one real alert from Part 8.
 
-## Part 10: Publish on GitHub (Day 3)
+## Part 10: Publish on GitHub 
 
 1. Create an empty repository called `llm-soc` on github.com (no README).
 2. In the project folder:
@@ -278,7 +258,7 @@ git push -u origin main
 ```
 3. Add to this README: your results table, the Garak report screenshot and a Wazuh alerts screenshot.
 
-✅ The repo link opens and shows your results. That's the link for Srikanth.
+✅ The repo link opens and shows your results. 
 
 ## Troubleshooting
 
