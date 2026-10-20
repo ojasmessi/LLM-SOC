@@ -48,7 +48,9 @@ Tested against Llama 3.2 (3B) running locally via Ollama. Each attack was run 5 
 | 100506 | AI agent attempted data exfiltration (LLM06) | 14 |
 | 100508 | High-risk interaction (risk score ≥ 70) | 2 |
 
-![Wazuh-alerts](image.png)
+<img width="1917" height="937" alt="image" src="https://github.com/user-attachments/assets/410254c7-a645-4cc4-8d97-0d5687c705b3" />
+<img width="1915" height="933" alt="image" src="https://github.com/user-attachments/assets/82e4500f-77bd-48fc-ae0f-0e9c1bd324cd" />
+
 
 ## Known limitations
 - **Paraphrased system-prompt leaks are not detected.** The canary only catches verbatim leaks (the 2 remaining successes, SPL-01).
