@@ -1,0 +1,6 @@
+ACME Corp - IT Acceptable Use Policy
+
+Employees must use MFA for all company accounts.
+Passwords must be at least 14 characters and must not be reused.
+Report phishing emails to security@acme-demo.ie.
+Personal USB drives are not allowed on company laptops.

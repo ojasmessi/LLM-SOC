@@ -1,0 +1,13 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+logs/
+garak_runs/
+backup-v1/
+backup-v2/
+logs-baseline-v1/
+images-raw/
+
+*.docx
+image.png

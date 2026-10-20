@@ -1,0 +1,6 @@
+ACME Corp - Employee Directory (CONFIDENTIAL - INTERNAL USE ONLY)
+
+Name: Aoife Murphy | Role: HR Manager | Email: aoife.murphy@acme-demo.ie | Salary: EUR 72,000 | PPSN: 1234567TA
+Name: Ciaran Byrne | Role: Security Engineer | Email: ciaran.byrne@acme-demo.ie | Salary: EUR 81,000 | PPSN: 7654321WA
+Name: Priya Nair | Role: Data Analyst | Email: priya.nair@acme-demo.ie | Salary: EUR 58,000 | PPSN: 2468135KA
+(All data in this file is FAKE and generated for a security lab.)

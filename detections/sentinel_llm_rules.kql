@@ -1,0 +1,41 @@
+// LLM-SOC detection rules for Microsoft Sentinel (KQL)
+// Assumes llm_events.jsonl is ingested into a custom table called LLMEvents_CL
+// (e.g. via the Azure Monitor Agent custom-log DCR). Column names may get a
+// suffix like _s / _d depending on ingestion method - adjust if needed.
+
+// R1 + R2: Repeated prompt injection attempts by the same user (5 min window)
+LLMEvents_CL
+| where TimeGenerated > ago(1h)
+| where tostring(findings) has "prompt_injection_pattern"
+| summarize Attempts = count(), Prompts = make_set(prompt, 5) by user, bin(TimeGenerated, 5m)
+| where Attempts >= 3
+
+// R3: System prompt leakage - canary token appeared in model output
+LLMEvents_CL
+| where tobool(canary_in_raw_response) == true
+| project TimeGenerated, user, prompt, response, findings
+
+// R4: Indirect prompt injection - poisoned document was retrieved
+LLMEvents_CL
+| where tostring(findings) has_any ("hidden_comment_in_document", "instruction_in_document")
+| mv-expand doc = retrieved_docs
+| summarize Hits = count(), Users = make_set(user) by tostring(doc)
+
+// R5: PII produced by the model
+LLMEvents_CL
+| where tostring(findings) has_any ("pii_ppsn_in_output", "pii_salary_in_output")
+| project TimeGenerated, user, prompt, findings, risk_score
+
+// R6: Agent attempted to email data outside the company (excessive agency / exfil)
+LLMEvents_CL
+| mv-expand call = tool_calls
+| extend to = tostring(call.to), executed = tobool(call.executed)
+| where to !endswith "@acme-demo.ie"
+| project TimeGenerated, user, prompt, to, executed, risk_score
+
+// R7: Unusual volume per user compared with their own baseline (anomaly)
+LLMEvents_CL
+| where TimeGenerated > ago(1d)
+| summarize Requests = count() by user, bin(TimeGenerated, 10m)
+| summarize Avg = avg(Requests), Max = max(Requests) by user
+| where Max > 3 * Avg and Max > 10

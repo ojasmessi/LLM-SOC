@@ -1,0 +1,80 @@
+<!--
+  LLM-SOC custom Wazuh rules.
+  Install: copy into /var/ossec/etc/rules/local_rules.xml on the Wazuh manager,
+  then: sudo systemctl restart wazuh-manager
+  The agent must read logs/llm_events.jsonl with <log_format>json</log_format>.
+  Rule IDs 100500-100599 are reserved for custom rules here.
+-->
+<group name="llm_soc,ai_security,">
+
+  <!-- Base rule: every event from our app -->
+  <rule id="100500" level="3">
+    <decoded_as>json</decoded_as>
+    <field name="app">llm-soc</field>
+    <description>LLM-SOC: chatbot interaction logged</description>
+  </rule>
+
+  <!-- R1: Direct prompt injection attempt blocked (OWASP LLM01 / ATLAS AML.T0051.000) -->
+  <rule id="100501" level="8">
+    <if_sid>100500</if_sid>
+    <field name="findings">prompt_injection_pattern</field>
+    <description>LLM-SOC: Prompt injection attempt by user $(user)</description>
+    <group>llm01_prompt_injection,</group>
+  </rule>
+
+  <!-- R2: Same user tries injection 3+ times in 5 minutes (persistent attacker) -->
+  <rule id="100502" level="12" frequency="3" timeframe="300">
+    <if_matched_sid>100501</if_matched_sid>
+    <same_field>user</same_field>
+    <description>LLM-SOC: Repeated prompt injection attempts by $(user) - likely active attacker</description>
+    <group>llm01_prompt_injection,</group>
+  </rule>
+
+  <!-- R3: Canary token in model output = system prompt leaked (LLM07 / AML.T0056) -->
+  <rule id="100503" level="13">
+    <if_sid>100500</if_sid>
+    <field name="canary_in_raw_response">true</field>
+    <description>LLM-SOC: CANARY token in model output - system prompt leakage by $(user)</description>
+    <group>llm07_system_prompt_leakage,</group>
+  </rule>
+
+  <!-- R4: Poisoned document retrieved (indirect injection, LLM01 / AML.T0051.001) -->
+  <rule id="100504" level="10">
+    <if_sid>100500</if_sid>
+    <field name="findings">hidden_comment_in_document|instruction_in_document</field>
+    <description>LLM-SOC: Indirect prompt injection - poisoned document retrieved ($(retrieved_docs))</description>
+    <group>llm01_indirect_injection,llm04_poisoning,</group>
+  </rule>
+
+  <!-- R5: PII in output (LLM02 / AML.T0057) -->
+  <rule id="100505" level="10">
+    <if_sid>100500</if_sid>
+    <field name="findings">pii_ppsn_in_output|pii_salary_in_output</field>
+    <description>LLM-SOC: Sensitive data (PII) produced by model for $(user)</description>
+    <group>llm02_sensitive_disclosure,</group>
+  </rule>
+
+  <!-- R6: Tool tried to email outside the company (LLM06 Excessive Agency) -->
+  <rule id="100506" level="14">
+    <if_sid>100500</if_sid>
+    <field name="findings">external_email_blocked|pii_in_tool_call|canary_in_tool_call</field>
+    <description>LLM-SOC: AI agent attempted data exfiltration via send_email</description>
+    <group>llm06_excessive_agency,exfiltration,</group>
+  </rule>
+
+  <!-- R7: Rate limit hit (LLM10 Unbounded Consumption) -->
+  <rule id="100507" level="7">
+    <if_sid>100500</if_sid>
+    <field name="findings">rate_limit_exceeded</field>
+    <description>LLM-SOC: Rate limit exceeded by $(user) - possible automated probing</description>
+    <group>llm10_unbounded_consumption,</group>
+  </rule>
+
+  <!-- R8: High risk score catch-all -->
+  <rule id="100508" level="12">
+    <if_sid>100500</if_sid>
+    <field name="risk_score" type="pcre2">^([7-9]\d|100)$</field>
+    <description>LLM-SOC: High-risk LLM interaction (risk score $(risk_score)) by $(user)</description>
+  </rule>
+
+</group>
