@@ -183,6 +183,9 @@ python -m garak --model_type rest -G garak_rest.json --probes promptinject --gen
 
 ✅ At the end Garak prints a pass/fail rate per probe and the path to an **HTML report**. Screenshot it for your README. Then try other probes: `--probes encoding`, `--probes dan`, `--probes latentinjection`. List them all with `python -m garak --list_probes`.
 
+<img width="1912" height="1027" alt="image" src="https://github.com/user-attachments/assets/ee31f6f0-754a-4a50-8a0c-43bf45493b8e" />
+
+
 ## Part 7: Turn on the AI firewall and re-test
 
 Stop the server (**Ctrl+C**) and restart with enforcement:
