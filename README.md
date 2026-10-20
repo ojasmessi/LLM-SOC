@@ -57,7 +57,10 @@ Tested against Llama 3.2 (3B) running locally via Ollama. Each attack was run 5 
 - **Unrequested internal actions.** The agent still emails internal addresses without being asked. Next step: an intent check / human approval before any tool call.
 - **Regex guardrails can be bypassed** by rephrasing or translation. Next step: an ML classifier such as Llama Guard.
 - **Correlation rule 100502** (repeated attempts by the same user) needs updating to Wazuh's normalised `dstuser` field.
-- The Garak scan (Part 6) has not been run yet.
+
+**Independent scan with NVIDIA Garak** (v0.17.1, `promptinject.HijackHateHumans`, 256 prompts, guardrails off):
+the model was hijacked into outputting the attacker's string in **14.45%** of attempts
+(95% CI: 10.16%–18.75%).
 
 ## Troubleshooting notes (real issues hit while building this)
 - Wazuh manager start-up **timed out** on a 4 GB VM, leaving a stale lock file. Fixed by raising VM RAM to 6 GB, extending the systemd timeout, and clearing the lock.
